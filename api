@@ -1,0 +1,87 @@
+#!/bin/bash
+
+set -o errexit -o nounset -o pipefail
+
+die() {
+	printf '%s\n' "$*" >&2
+	exit 1
+}
+
+file_envsubst() {
+	local input="$1"
+
+	[[ -r "$input" ]] || die "bad input: $input"
+
+	envsubst <"$input"
+}
+
+#
+# init, args, validation
+#
+
+if [[ -v APIRC ]]; then
+	[[ -r "$APIRC" ]] || die "bad APIRC: $APIRC"
+	source -- "$APIRC"
+elif [[ -r ~/.apirc ]]; then
+	source -- ~/.apirc
+fi
+
+if (( $# < 2 )); then
+	die 'invalid usage'
+fi
+
+METHOD="$1"
+REQUEST_DIR="$2"
+
+[[ -r "$REQUEST_DIR" ]] || die "bad REQUEST_DIR: $REQUEST_DIR"
+[[ -r "$REQUEST_DIR/path" ]] || die "bad path: $REQUEST_DIR/path"
+
+[[
+	-e "$REQUEST_DIR/json" &&
+	-e "$REQUEST_DIR/body"
+]] && die "'json' and 'body' cannot coexist in the same request"
+
+#
+# build curl command and run it
+#
+
+curl_cmd=("${CURL[@]}" -X "$METHOD")
+
+cleanup_files=()
+trap 'rm -f -- "${cleanup_files[@]}"' EXIT
+
+url="$(file_envsubst "$REQUEST_DIR/path")"
+
+if [[ -r "$REQUEST_DIR/headers" ]]; then
+	temp="$(mktemp)"
+	cleanup_files+=("$temp")
+
+	file_envsubst "$REQUEST_DIR/headers" >"$temp"
+	curl_cmd+=(--header "@$temp")
+
+	unset temp
+fi
+
+if [[ -r "$REQUEST_DIR/json" ]]; then
+	temp="$(mktemp)"
+	cleanup_files+=("$temp")
+
+	file_envsubst "$REQUEST_DIR/json" >"$temp"
+	curl_cmd+=(--json "@$temp")
+
+	unset temp
+fi
+
+if [[ -r "$REQUEST_DIR/body" ]]; then
+	temp="$(mktemp)"
+	cleanup_files+=("$temp")
+
+	file_envsubst "$REQUEST_DIR/body" >"$temp"
+	curl_cmd+=(--data "@$temp")
+
+	unset temp
+fi
+
+[[ -r "$REQUEST_DIR/query" ]] && url+="?$(file_envsubst "$REQUEST_DIR/query")"
+
+"${curl_cmd[@]}" -- "$url"

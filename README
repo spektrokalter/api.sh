@@ -1,0 +1,45 @@
+Usage
+
+	api GET business-unit/read-all
+
+	api POST staff/evaluate-business-units.d/nikos
+
+Concept
+
+	Use files to describe requests. Use environment variables,
+	which are inherited or set in ~/.apirc or $APIRC, to alter the
+	contents of the files.
+
+Files
+
+	~/.apirc
+
+Environment
+
+   APIRC
+	Script to source instead of ~/.apirc.  Use for project
+	initialization.
+
+Tips
+
+	Storing environment variables in a JSON file allows for
+	unobstructed automatization.
+
+Request directory structure
+
+	Can a request directory have subdirectories related to the same
+	concrete request? E.g. headers.d/cors, headers.d/auth, etc. Yes,
+	in theory.
+
+	The more general question is, by what criteria can the tool
+	distinguish between the request directory and a subdirectory
+	related to the request? (This could pave the way for certain
+	features.)
+
+	I chose not to define such criteria. Instead, it is the user
+	who must know what is a request directory and what is not. Thus,
+	the user is entirely in control of the "certain features."
+
+Unimplemented
+
+	URL validation
