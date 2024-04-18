@@ -39,7 +39,3 @@ Request directory structure
 	I chose not to define such criteria. Instead, it is the user
 	who must know what is a request directory and what is not. Thus,
 	the user is entirely in control of the "certain features."
-
-Unimplemented
-
-	URL validation
