@@ -48,8 +48,6 @@ curl_cmd=("${CURL[@]}" -X "$METHOD")
 cleanup_files=()
 trap 'rm -- "${cleanup_files[@]}"' EXIT
 
-url="$(envsubst <"$request_path")"
-
 if [[ -f "$request_headers" && -r "$request_headers" ]]; then
 	temp="$(mktemp)"
 	cleanup_files+=("$temp")
@@ -80,6 +78,7 @@ if [[ -f "$request_body" && -r "$request_body" ]]; then
 	unset temp
 fi
 
+url="$(envsubst <"$request_path")"
 if [[ -f "$request_query" && -r "$request_query" ]]; then
 	url+="?$(envsubst <"$request_query")"
 fi
