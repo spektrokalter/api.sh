@@ -46,7 +46,7 @@ request_query="$REQUEST_DIR/query"
 curl_cmd=("${CURL[@]}" -X "$METHOD")
 
 cleanup_files=()
-trap 'rm -f -- "${cleanup_files[@]}"' EXIT
+trap 'rm -- "${cleanup_files[@]}"' EXIT
 
 url="$(envsubst <"$request_path")"
 
