@@ -7,14 +7,6 @@ die() {
 	exit 1
 }
 
-file_envsubst() {
-	local input="$1"
-
-	[[ -r "$input" ]] || die "bad input: $input"
-
-	envsubst <"$input"
-}
-
 #
 # init, args, validation
 #
@@ -50,13 +42,13 @@ curl_cmd=("${CURL[@]}" -X "$METHOD")
 cleanup_files=()
 trap 'rm -f -- "${cleanup_files[@]}"' EXIT
 
-url="$(file_envsubst "$REQUEST_DIR/path")"
+url="$(envsubst <"$REQUEST_DIR/path")"
 
 if [[ -r "$REQUEST_DIR/headers" ]]; then
 	temp="$(mktemp)"
 	cleanup_files+=("$temp")
 
-	file_envsubst "$REQUEST_DIR/headers" >"$temp"
+	envsubst <"$REQUEST_DIR/headers" >"$temp"
 	curl_cmd+=(--header "@$temp")
 
 	unset temp
@@ -66,7 +58,7 @@ if [[ -r "$REQUEST_DIR/json" ]]; then
 	temp="$(mktemp)"
 	cleanup_files+=("$temp")
 
-	file_envsubst "$REQUEST_DIR/json" >"$temp"
+	envsubst <"$REQUEST_DIR/json" >"$temp"
 	curl_cmd+=(--json "@$temp")
 
 	unset temp
@@ -76,12 +68,12 @@ if [[ -r "$REQUEST_DIR/body" ]]; then
 	temp="$(mktemp)"
 	cleanup_files+=("$temp")
 
-	file_envsubst "$REQUEST_DIR/body" >"$temp"
+	envsubst <"$REQUEST_DIR/body" >"$temp"
 	curl_cmd+=(--data "@$temp")
 
 	unset temp
 fi
 
-[[ -r "$REQUEST_DIR/query" ]] && url+="?$(file_envsubst "$REQUEST_DIR/query")"
+[[ -r "$REQUEST_DIR/query" ]] && url+="?$(envsubst <"$REQUEST_DIR/query")"
 
 "${curl_cmd[@]}" -- "$url"
