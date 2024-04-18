@@ -25,12 +25,18 @@ fi
 METHOD="$1"
 REQUEST_DIR="$2"
 
+request_path="$REQUEST_DIR/path"
+request_headers="$REQUEST_DIR/headers"
+request_json="$REQUEST_DIR/json"
+request_body="$REQUEST_DIR/body"
+request_query="$REQUEST_DIR/query"
+
 [[ -d "$REQUEST_DIR" && -x "$REQUEST_DIR" ]] || die "bad REQUEST_DIR: $REQUEST_DIR"
-[[ -f "$REQUEST_DIR/path" && -r "$REQUEST_DIR/path" ]] || die "bad path: $REQUEST_DIR/path"
+[[ -f "$request_path" && -r "$request_path" ]] || die "bad request path: $request_path"
 
 [[
-	-e "$REQUEST_DIR/json" &&
-	-e "$REQUEST_DIR/body"
+	-e "$request_json" &&
+	-e "$request_body"
 ]] && die "'json' and 'body' cannot coexist in the same request"
 
 #
@@ -42,38 +48,38 @@ curl_cmd=("${CURL[@]}" -X "$METHOD")
 cleanup_files=()
 trap 'rm -f -- "${cleanup_files[@]}"' EXIT
 
-url="$(envsubst <"$REQUEST_DIR/path")"
+url="$(envsubst <"$request_path")"
 
-if [[ -f "$REQUEST_DIR/headers" && -r "$REQUEST_DIR/headers" ]]; then
+if [[ -f "$request_headers" && -r "$request_headers" ]]; then
 	temp="$(mktemp)"
 	cleanup_files+=("$temp")
 
-	envsubst <"$REQUEST_DIR/headers" >"$temp"
+	envsubst <"$request_headers" >"$temp"
 	curl_cmd+=(--header "@$temp")
 
 	unset temp
 fi
 
-if [[ -f "$REQUEST_DIR/json" && -r "$REQUEST_DIR/json" ]]; then
+if [[ -f "$request_json" && -r "$request_json" ]]; then
 	temp="$(mktemp)"
 	cleanup_files+=("$temp")
 
-	envsubst <"$REQUEST_DIR/json" >"$temp"
+	envsubst <"$request_json" >"$temp"
 	curl_cmd+=(--json "@$temp")
 
 	unset temp
 fi
 
-if [[ -f "$REQUEST_DIR/body" && -r "$REQUEST_DIR/body" ]]; then
+if [[ -f "$request_body" && -r "$request_body" ]]; then
 	temp="$(mktemp)"
 	cleanup_files+=("$temp")
 
-	envsubst <"$REQUEST_DIR/body" >"$temp"
+	envsubst <"$request_body" >"$temp"
 	curl_cmd+=(--data "@$temp")
 
 	unset temp
 fi
 
-[[ -f "$REQUEST_DIR/query" && -r "$REQUEST_DIR/query" ]] && url+="?$(envsubst <"$REQUEST_DIR/query")"
+[[ -f "$request_query" && -r "$request_query" ]] && url+="?$(envsubst <"$request_query")"
 
 "${curl_cmd[@]}" -- "$url"
