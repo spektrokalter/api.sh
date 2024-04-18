@@ -80,6 +80,8 @@ if [[ -f "$request_body" && -r "$request_body" ]]; then
 	unset temp
 fi
 
-[[ -f "$request_query" && -r "$request_query" ]] && url+="?$(envsubst <"$request_query")"
+if [[ -f "$request_query" && -r "$request_query" ]]; then
+	url+="?$(envsubst <"$request_query")"
+fi
 
 "${curl_cmd[@]}" -- "$url"
