@@ -12,7 +12,7 @@ die() {
 #
 
 if [[ -v APIRC ]]; then
-	[[ -r "$APIRC" ]] || die "bad APIRC: $APIRC"
+	[[ -f "$APIRC" && -r "$APIRC" ]] || die "bad APIRC: $APIRC"
 	source -- "$APIRC"
 elif [[ -r ~/.apirc ]]; then
 	source -- ~/.apirc
@@ -25,8 +25,8 @@ fi
 METHOD="$1"
 REQUEST_DIR="$2"
 
-[[ -r "$REQUEST_DIR" ]] || die "bad REQUEST_DIR: $REQUEST_DIR"
-[[ -r "$REQUEST_DIR/path" ]] || die "bad path: $REQUEST_DIR/path"
+[[ -d "$REQUEST_DIR" && -x "$REQUEST_DIR" ]] || die "bad REQUEST_DIR: $REQUEST_DIR"
+[[ -f "$REQUEST_DIR/path" && -r "$REQUEST_DIR/path" ]] || die "bad path: $REQUEST_DIR/path"
 
 [[
 	-e "$REQUEST_DIR/json" &&
@@ -44,7 +44,7 @@ trap 'rm -f -- "${cleanup_files[@]}"' EXIT
 
 url="$(envsubst <"$REQUEST_DIR/path")"
 
-if [[ -r "$REQUEST_DIR/headers" ]]; then
+if [[ -f "$REQUEST_DIR/headers" && -r "$REQUEST_DIR/headers" ]]; then
 	temp="$(mktemp)"
 	cleanup_files+=("$temp")
 
@@ -54,7 +54,7 @@ if [[ -r "$REQUEST_DIR/headers" ]]; then
 	unset temp
 fi
 
-if [[ -r "$REQUEST_DIR/json" ]]; then
+if [[ -f "$REQUEST_DIR/json" && -r "$REQUEST_DIR/json" ]]; then
 	temp="$(mktemp)"
 	cleanup_files+=("$temp")
 
@@ -64,7 +64,7 @@ if [[ -r "$REQUEST_DIR/json" ]]; then
 	unset temp
 fi
 
-if [[ -r "$REQUEST_DIR/body" ]]; then
+if [[ -f "$REQUEST_DIR/body" && -r "$REQUEST_DIR/body" ]]; then
 	temp="$(mktemp)"
 	cleanup_files+=("$temp")
 
@@ -74,6 +74,6 @@ if [[ -r "$REQUEST_DIR/body" ]]; then
 	unset temp
 fi
 
-[[ -r "$REQUEST_DIR/query" ]] && url+="?$(envsubst <"$REQUEST_DIR/query")"
+[[ -f "$REQUEST_DIR/query" && -r "$REQUEST_DIR/query" ]] && url+="?$(envsubst <"$REQUEST_DIR/query")"
 
 "${curl_cmd[@]}" -- "$url"
