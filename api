@@ -14,7 +14,7 @@ die() {
 if [[ -v APIRC ]]; then
 	[[ -f "$APIRC" && -r "$APIRC" ]] || die "bad APIRC: $APIRC"
 	source -- "$APIRC"
-elif [[ -r ~/.apirc ]]; then
+elif [[ -f ~/.apirc && -r ~/.apirc ]]; then
 	source -- ~/.apirc
 fi
 
