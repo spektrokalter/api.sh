@@ -63,7 +63,7 @@ if [[ -f "$request_headers" && -r "$request_headers" ]]; then
 	cleanup_files+=("$temp")
 
 	envsubst <"$request_headers" >"$temp"
-	curl_cmd+=(--header "@$temp")
+	curl_cmd+=(-H "@$temp")
 
 	unset temp
 fi
@@ -83,7 +83,7 @@ if [[ -f "$request_body" && -r "$request_body" ]]; then
 	cleanup_files+=("$temp")
 
 	envsubst <"$request_body" >"$temp"
-	curl_cmd+=(--data "@$temp")
+	curl_cmd+=(-d "@$temp")
 
 	unset temp
 fi
