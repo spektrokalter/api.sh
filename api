@@ -8,7 +8,7 @@ die() {
 }
 
 #
-# init, args, validation
+# configuration
 #
 
 CURL=(/usr/bin/curl)
@@ -20,12 +20,20 @@ elif [[ -f ~/.apirc && -r ~/.apirc ]]; then
 	source -- ~/.apirc
 fi
 
+#
+# command-line arguments
+#
+
 if (( $# < 2 )); then
 	die 'invalid usage'
 fi
 
 METHOD="$1"
 REQUEST_DIR="$2"
+
+#
+# validation
+#
 
 request_path="$REQUEST_DIR/path"
 request_headers="$REQUEST_DIR/headers"
