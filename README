@@ -22,8 +22,8 @@ Environment
 
 Tips
 
-	Storing environment variables in a JSON file allows for
-	unobstructed automatization.
+	Storing environment variables in a JSON file makes automatization
+	easier.
 
 Request directory structure
 
