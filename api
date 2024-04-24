@@ -11,6 +11,8 @@ die() {
 # init, args, validation
 #
 
+CURL=(/usr/bin/curl)
+
 if [[ -v APIRC ]]; then
 	[[ -f "$APIRC" && -r "$APIRC" ]] || die "bad APIRC: $APIRC"
 	source -- "$APIRC"
