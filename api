@@ -24,17 +24,17 @@ fi
 # command-line arguments
 #
 
-if (( $# < 2 )); then
+if (( $# < 1 )); then
 	die 'invalid usage'
 fi
 
-METHOD="$1"
-REQUEST_DIR="$2"
+REQUEST_DIR="$1"
 
 #
 # validation
 #
 
+request_method="$REQUEST_DIR/method"
 request_path="$REQUEST_DIR/path"
 request_headers="$REQUEST_DIR/headers"
 request_json="$REQUEST_DIR/json"
@@ -43,6 +43,7 @@ request_query="$REQUEST_DIR/query"
 
 [[ -d "$REQUEST_DIR" && -x "$REQUEST_DIR" ]] || die "bad REQUEST_DIR: $REQUEST_DIR"
 [[ -f "$request_path" && -r "$request_path" ]] || die "bad request path: $request_path"
+[[ -f "$request_method" && -r "$request_method" ]] || die "bad request method: $request_method"
 
 [[
 	-e "$request_json" &&
@@ -53,7 +54,7 @@ request_query="$REQUEST_DIR/query"
 # build curl command and run it
 #
 
-curl_cmd=("${CURL[@]}" -X "$METHOD")
+curl_cmd=("${CURL[@]}" -X "$(cat -- "$request_method")")
 
 cleanup_files=()
 trap 'rm -- "${cleanup_files[@]}"' EXIT
