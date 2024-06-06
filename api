@@ -57,7 +57,7 @@ request_query="$REQUEST_DIR/query"
 curl_cmd=("${CURL[@]}" -X "$(cat -- "$request_method")")
 
 cleanup_files=()
-trap 'rm -- "${cleanup_files[@]}"' EXIT
+trap 'rm -f -- "${cleanup_files[@]}"' EXIT
 
 if [[ -f "$request_headers" && -r "$request_headers" ]]; then
 	temp="$(mktemp)"
